@@ -1,11 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import 'dotenv/config'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix("api/afisha");
+
+  // Глобальный префикс API
+  app.setGlobalPrefix('api/afisha');
   app.enableCors();
-  await app.listen(3000);
+
+  const port = process.env.PORT || 3001;
+  await app.listen(port);
+  console.log(`🚀 Backend запущен на http://localhost:${port}`);
 }
 bootstrap();
