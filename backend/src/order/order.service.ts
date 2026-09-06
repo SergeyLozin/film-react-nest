@@ -13,21 +13,30 @@ export class OrderService {
   async createOrder(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
     const { tickets } = createOrderDto;
 
+    // Проверка на дубликаты внутри одного заказа
+    const uniqueTickets = new Set<string>();
+    for (const ticket of tickets) {
+      const key = `${ticket.film}|${ticket.session}|${ticket.row}|${ticket.seat}`;
+      if (uniqueTickets.has(key)) {
+        throw new BadRequestException(
+          `Билет на место ${ticket.row}:${ticket.seat} указан дважды в одном заказе`,
+        );
+      }
+      uniqueTickets.add(key);
+    }
+
     // Проверяем каждое место
     for (const ticket of tickets) {
-      // Находим фильм
       const film = await this.filmRepository.findById(ticket.film);
       if (!film) {
         throw new BadRequestException(`Фильм с id ${ticket.film} не найден`);
       }
 
-      // Находим сеанс в расписании фильма
       const session = film.schedule?.find((s) => s.id === ticket.session);
       if (!session) {
         throw new BadRequestException(`Сеанс с id ${ticket.session} не найден`);
       }
 
-      // Проверяем, не занято ли место
       const seatKey = `${ticket.row}:${ticket.seat}`;
       if (session.taken?.includes(seatKey)) {
         throw new BadRequestException(
@@ -35,7 +44,6 @@ export class OrderService {
         );
       }
 
-      // Проверяем, что место существует в зале
       if (ticket.row > session.rows || ticket.seat > session.seats) {
         throw new BadRequestException(
           `Место ${ticket.row}:${ticket.seat} не существует в зале (рядов: ${session.rows}, мест: ${session.seats})`,
@@ -46,16 +54,23 @@ export class OrderService {
     // Создаём заказ
     const order = await this.orderRepository.create(createOrderDto);
 
-    // Обновляем занятые места для каждого билета
+    // ✅ Атомарно обновляем занятые места
     for (const ticket of tickets) {
-      await this.filmRepository.addTakenSeat(
+      const success = await this.filmRepository.addTakenSeat(
         ticket.film,
         ticket.session,
         `${ticket.row}:${ticket.seat}`,
       );
+
+      if (!success) {
+        // Откат: удаляем заказ, т.к. место занято
+        await this.orderRepository.delete(order.id);
+        throw new BadRequestException(
+          `Место ${ticket.row}:${ticket.seat} уже занято на сеансе ${ticket.session}`,
+        );
+      }
     }
 
-    // Формируем ответ
     return {
       total: order.tickets.length,
       items: order.tickets.map((ticket) => ({

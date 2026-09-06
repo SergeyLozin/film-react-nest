@@ -15,22 +15,29 @@ export class FilmRepository {
     return this.filmModel.findOne({ id }).exec();
   }
 
-  // Метод для добавления занятого места
+  /**
+   * Атомарное добавление занятого места.
+   * Проверяет, что место свободно, и только затем добавляет его.
+   * Возвращает true, если место успешно забронировано, иначе false.
+   */
   async addTakenSeat(
     filmId: string,
     sessionId: string,
     seatKey: string,
-  ): Promise<void> {
-    await this.filmModel
+  ): Promise<boolean> {
+    const result = await this.filmModel
       .updateOne(
         {
           id: filmId,
           'schedule.id': sessionId,
+          'schedule.taken': { $not: { $in: [seatKey] } }, // ✅ Место должно быть свободно
         },
         {
           $addToSet: { 'schedule.$.taken': seatKey },
         },
       )
       .exec();
+
+    return result.modifiedCount > 0; // ✅ true, если бронирование успешно
   }
 }

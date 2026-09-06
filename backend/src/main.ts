@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ConfigService } from './config/config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -8,7 +9,10 @@ async function bootstrap() {
   app.setGlobalPrefix('api/afisha');
   app.enableCors();
 
-  const port = process.env.PORT || 3001;
+  // Получаем порт из ConfigService
+  const configService = app.get(ConfigService);
+  const port = configService.port;
+
   await app.listen(port);
   console.log(`🚀 Backend запущен на http://localhost:${port}`);
 }

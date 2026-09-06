@@ -1,20 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-
-export interface Ticket {
-  film: string;
-  session: string;
-  daytime: string;
-  row: number;
-  seat: number;
-  price: number;
-}
+import { ITicket } from '../common/interfaces/ticket.interface';
 
 export interface Order {
   id: string;
   email: string;
   phone: string;
-  tickets: Ticket[];
+  tickets: ITicket[];
   createdAt: Date;
 }
 
@@ -38,6 +30,13 @@ export class OrderRepository {
 
   async findById(id: string): Promise<Order | undefined> {
     return this.orders.find((order) => order.id === id);
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const index = this.orders.findIndex((order) => order.id === id);
+    if (index === -1) return false;
+    this.orders.splice(index, 1);
+    return true;
   }
 
   isSeatTaken(sessionId: string, row: number, seat: number): boolean {

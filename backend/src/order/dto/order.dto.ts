@@ -1,5 +1,7 @@
+import { ITicket } from '../../common/interfaces/ticket.interface';
+
 // Запрос на POST /order
-export class TicketDto {
+export class TicketDto implements ITicket {
   film: string;
   session: string;
   daytime: string;
@@ -15,8 +17,14 @@ export class CreateOrderDto {
 }
 
 // Ответ на POST /order
-export class OrderResponseItemDto extends TicketDto {
+export class OrderResponseItemDto implements ITicket {
   id: string;
+  film: string;
+  session: string;
+  daytime: string;
+  row: number;
+  seat: number;
+  price: number;
 }
 
 export class OrderResponseDto {
