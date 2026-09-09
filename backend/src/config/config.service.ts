@@ -5,12 +5,20 @@ import { ConfigService as NestConfigService } from '@nestjs/config';
 export class ConfigService {
   constructor(private configService: NestConfigService) {}
 
-  get databaseUrl(): string {
-    const url = this.configService.get<string>('DATABASE_URL');
-    if (!url) {
-      throw new Error('DATABASE_URL не задан в .env файле');
-    }
-    return url;
+  get databaseDriver(): string {
+    return this.configService.get<string>('DATABASE_DRIVER') || 'postgres';
+  }
+
+  get databaseHost(): string {
+    return this.configService.get<string>('DATABASE_HOST') || 'localhost';
+  }
+
+  get databasePort(): number {
+    return parseInt(this.configService.get<string>('DATABASE_PORT') || '5432', 10);
+  }
+
+  get databaseName(): string {
+    return this.configService.get<string>('DATABASE_NAME') || 'film';
   }
 
   get databaseUsername(): string {
@@ -21,8 +29,17 @@ export class ConfigService {
     return this.configService.get<string>('DATABASE_PASSWORD') || '';
   }
 
-  get databaseDriver(): string {
-    return this.configService.get<string>('DATABASE_DRIVER') || 'postgres';
+  get databaseUrl(): string {
+    const username = this.databaseUsername;
+    const password = this.databasePassword;
+    const host = this.databaseHost;
+    const port = this.databasePort;
+    const name = this.databaseName;
+
+    if (username && password) {
+      return `postgresql://${username}:${password}@${host}:${port}/${name}`;
+    }
+    return `postgresql://${host}:${port}/${name}`;
   }
 
   get port(): number {

@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryColumn, CreateDateColumn } from 'typeorm';
+import { ITicket } from '../../common/interfaces/ticket.interface';
 
 @Entity('orders')
 export class OrderEntity {
@@ -12,7 +13,7 @@ export class OrderEntity {
   phone: string;
 
   @Column('jsonb')
-  tickets: any[];
+  tickets: ITicket[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
