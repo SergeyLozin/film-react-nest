@@ -13,15 +13,23 @@ export class ConfigService {
     return url;
   }
 
+  get databaseUsername(): string {
+    return this.configService.get<string>('DATABASE_USERNAME') || '';
+  }
+
+  get databasePassword(): string {
+    return this.configService.get<string>('DATABASE_PASSWORD') || '';
+  }
+
+  get databaseDriver(): string {
+    return this.configService.get<string>('DATABASE_DRIVER') || 'postgres';
+  }
+
   get port(): number {
     return parseInt(this.configService.get<string>('PORT') || '3001', 10);
   }
 
-  get debug(): string {
-    return this.configService.get<string>('DEBUG') || '';
-  }
-
-  get databaseDriver(): string {
-    return this.configService.get<string>('DATABASE_DRIVER') || 'mongodb';
+  get debug(): boolean {
+    return this.configService.get<string>('DEBUG') === '*';
   }
 }

@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import { OrderEntity } from '../order/entities/order.entity';
 import { ITicket } from '../common/interfaces/ticket.interface';
 
 export interface Order {
@@ -12,45 +15,45 @@ export interface Order {
 
 @Injectable()
 export class OrderRepository {
-  private orders: Order[] = [];
+  constructor(
+    @InjectRepository(OrderEntity)
+    private orderRepo: Repository<OrderEntity>,
+  ) {}
 
   async create(orderData: Omit<Order, 'id' | 'createdAt'>): Promise<Order> {
-    const order: Order = {
+    const order = this.orderRepo.create({
       id: uuidv4(),
-      ...orderData,
+      email: orderData.email,
+      phone: orderData.phone,
+      tickets: orderData.tickets,
       createdAt: new Date(),
-    };
-    this.orders.push(order);
-    return order;
+    });
+    await this.orderRepo.save(order);
+    return this.toOrder(order);
   }
 
   async findAll(): Promise<Order[]> {
-    return this.orders;
+    const orders = await this.orderRepo.find();
+    return orders.map(this.toOrder);
   }
 
   async findById(id: string): Promise<Order | undefined> {
-    return this.orders.find((order) => order.id === id);
+    const order = await this.orderRepo.findOne({ where: { id } });
+    return order ? this.toOrder(order) : undefined;
   }
 
   async delete(id: string): Promise<boolean> {
-    const index = this.orders.findIndex((order) => order.id === id);
-    if (index === -1) return false;
-    this.orders.splice(index, 1);
-    return true;
+    const result = await this.orderRepo.delete(id);
+    return (result.affected || 0) > 0;
   }
 
-  isSeatTaken(sessionId: string, row: number, seat: number): boolean {
-    return this.orders.some((order) =>
-      order.tickets.some(
-        (ticket) =>
-          ticket.session === sessionId &&
-          ticket.row === row &&
-          ticket.seat === seat,
-      ),
-    );
-  }
-
-  async clear(): Promise<void> {
-    this.orders = [];
+  private toOrder(entity: OrderEntity): Order {
+    return {
+      id: entity.id,
+      email: entity.email,
+      phone: entity.phone,
+      tickets: entity.tickets,
+      createdAt: entity.createdAt,
+    };
   }
 }
