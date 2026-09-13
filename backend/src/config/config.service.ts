@@ -14,7 +14,10 @@ export class ConfigService {
   }
 
   get databasePort(): number {
-    return parseInt(this.configService.get<string>('DATABASE_PORT') || '5432', 10);
+    return parseInt(
+      this.configService.get<string>('DATABASE_PORT') || '5432',
+      10,
+    );
   }
 
   get databaseName(): string {

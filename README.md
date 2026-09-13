@@ -1,36 +1,137 @@
-# FILM!
+# Film!
 
-## Установка
+Онлайн-сервис бронирования билетов в кинотеатр.
 
-### MongoDB
+## Демо
 
-Установите MongoDB скачав дистрибутив с официального сайта или с помощью пакетного менеджера вашей ОС. Также можно воспользоваться Docker (см. ветку `feat/docker`.
+- Фронтенд: https://lozo.students.nomorepartiessite.ru
+- API: https://api.lozo.students.nomorepartiessite.ru/api/afisha/films
+- pgAdmin: http://lozo.students.nomorepartiessite.ru:8080
 
-Выполните скрипт `test/mongodb_initial_stub.js` в консоли `mongo`.
+## Технологии
+
+- Frontend: React + Vite + TypeScript
+- Backend: Nest.js + TypeORM + PostgreSQL
+- Infrastructure: Docker + Nginx + GitHub Actions
+- Container Registry: GitHub Container Registry (GHCR)
+- Hosting: Yandex Cloud
+- SSL: Let's Encrypt (Certbot)
+
+## Быстрый старт
+
+### Требования
+
+- Docker
+- Docker Compose
+
+### Запуск
+
+docker compose up -d --build
+
+После запуска откройте:
+
+- Фронтенд: http://localhost
+- API: http://localhost/api/afisha/films
+- pgAdmin: http://localhost:8080
+
+### Остановка
+
+docker compose down
+
+Для полного сброса (с удалением данных БД):
+
+docker compose down -v
+
+## Production
+
+Для запуска на сервере используется docker-compose.prod.yml — образы берутся из GitHub Container Registry без локальной сборки.
+
+docker compose -f docker-compose.prod.yml up -d
+
+## Локальная разработка
 
 ### Бэкенд
 
-Перейдите в папку с исходным кодом бэкенда
+cd backend
+npm ci
+cp .env.example .env
+npm run start:dev
 
-`cd backend`
+Переменные окружения в .env:
 
-Установите зависимости (точно такие же, как в package-lock.json) помощью команд
+- DATABASE_DRIVER — тип драйвера СУБД (postgres)
+- DATABASE_HOST — хост базы данных
+- DATABASE_PORT — порт базы данных
+- DATABASE_NAME — имя базы данных
+- DATABASE_USERNAME — пользователь базы данных
+- DATABASE_PASSWORD — пароль базы данных
+- PORT — порт бэкенда
+- LOGGER_TYPE — тип логгера (dev, json, tskv)
 
-`npm ci` или `yarn install --frozen-lockfile`
+### Фронтенд
 
-Создайте `.env` файл из примера `.env.example`, в нём укажите:
+cd frontend
+npm ci
+npm run dev
 
-* `DATABASE_DRIVER` - тип драйвера СУБД - в нашем случае это `mongodb` 
-* `DATABASE_URL` - адрес СУБД MongoDB, например `mongodb://127.0.0.1:27017/practicum`.  
+## Документация API
 
-MongoDB должна быть установлена и запущена.
+- OpenAPI-спецификация: film.yml
+- Коллекция Postman: film.postman.json
 
-Запустите бэкенд:
+## Тесты
 
-`npm start:debug`
+cd backend
+npm test
 
-Для проверки отправьте тестовый запрос с помощью Postman или `curl`.
+Доступные команды:
 
+- npm test — запуск всех тестов
+- npm run test:watch — запуск в режиме наблюдения
+- npm run test:cov — запуск с покрытием
 
+## Логирование
 
+Поддерживается три режима логирования, выбираются через переменную окружения LOGGER_TYPE:
 
+- dev — цветные логи для разработки (по умолчанию)
+- json — структурированные логи в формате JSON
+- tskv — логи в формате TSKV (Tab-Separated Key-Value)
+
+Пример:
+
+LOGGER_TYPE=json npm run start:dev
+
+## Структура проекта
+
+film-react-nest/
+├── backend/              # Бэкенд на Nest.js
+│   ├── src/
+│   │   ├── films/        # Модуль фильмов
+│   │   ├── order/        # Модуль заказов
+│   │   ├── repository/   # Репозитории TypeORM
+│   │   ├── logger/       # Логгеры
+│   │   └── config/       # Конфигурация
+│   └── test/             # Тесты и SQL-скрипты
+├── frontend/             # Фронтенд на React
+│   └── src/
+│       ├── components/   # Компоненты
+│       └── utils/        # Утилиты
+├── nginx/                # Конфигурация nginx
+├── .github/workflows/    # GitHub Actions
+├── docker-compose.yml    # Docker Compose для локальной разработки
+└── docker-compose.prod.yml  # Docker Compose для продакшена
+
+## CI/CD
+
+При пуше в ветки main и review-2 запускается GitHub Actions workflow, который:
+
+1. Собирает три Docker-образа: film-backend, film-frontend, film-nginx
+2. Публикует их в GitHub Container Registry
+3. Образы доступны для деплоя на сервере
+
+Ссылка на workflow: .github/workflows/deploy.yml
+
+## Лицензия
+
+MIT

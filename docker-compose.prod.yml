@@ -70,7 +70,7 @@ services:
     networks:
       - film-network
 
-    nginx:
+  nginx:
     image: ghcr.io/sergeylozin/film-nginx:latest
     container_name: film-nginx
     restart: unless-stopped

@@ -6,7 +6,11 @@ export class TskvLogger implements LoggerService {
    * Форматирует сообщение в TSKV формат.
    * Поля разделяются табуляцией \t, запись заканчивается \n.
    */
-  private formatMessage(level: string, message: any, ...optionalParams: any[]): string {
+  private formatMessage(
+    level: string,
+    message: any,
+    ...optionalParams: any[]
+  ): string {
     const fields: string[] = [
       `level=${level}`,
       `message=${this.stringify(message)}`,
@@ -37,18 +41,26 @@ export class TskvLogger implements LoggerService {
   }
 
   error(message: any, ...optionalParams: any[]): void {
-    process.stderr.write(this.formatMessage('error', message, ...optionalParams));
+    process.stderr.write(
+      this.formatMessage('error', message, ...optionalParams),
+    );
   }
 
   warn(message: any, ...optionalParams: any[]): void {
-    process.stderr.write(this.formatMessage('warn', message, ...optionalParams));
+    process.stderr.write(
+      this.formatMessage('warn', message, ...optionalParams),
+    );
   }
 
   debug(message: any, ...optionalParams: any[]): void {
-    process.stdout.write(this.formatMessage('debug', message, ...optionalParams));
+    process.stdout.write(
+      this.formatMessage('debug', message, ...optionalParams),
+    );
   }
 
   verbose(message: any, ...optionalParams: any[]): void {
-    process.stdout.write(this.formatMessage('verbose', message, ...optionalParams));
+    process.stdout.write(
+      this.formatMessage('verbose', message, ...optionalParams),
+    );
   }
 }

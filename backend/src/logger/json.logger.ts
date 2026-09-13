@@ -2,7 +2,11 @@ import { Injectable, LoggerService } from '@nestjs/common';
 
 @Injectable()
 export class JsonLogger implements LoggerService {
-  private formatMessage(level: string, message: any, ...optionalParams: any[]): string {
+  private formatMessage(
+    level: string,
+    message: any,
+    ...optionalParams: any[]
+  ): string {
     return JSON.stringify({
       level,
       message,
