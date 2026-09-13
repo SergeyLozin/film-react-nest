@@ -17,10 +17,9 @@ async function bootstrap() {
   // Получаем настройки из ConfigService
   const configService = app.get(ConfigService);
   const port = configService.port;
+  const loggerType = configService.loggerType;
 
   // Выбираем логгер в зависимости от переменной окружения
-  const loggerType = process.env.LOGGER_TYPE || 'dev';
-
   switch (loggerType) {
     case 'json':
       app.useLogger(new JsonLogger());

@@ -60,11 +60,12 @@ export class FilmRepository {
       .createQueryBuilder()
       .update(ScheduleEntity)
       .set({
-        taken: () => `array_append(taken, '${seatKey}')`,
+        taken: () => 'array_append(taken, :seatKeyParam)',
       })
       .where('id = :sessionId', { sessionId })
       .andWhere('film_id = :filmId', { filmId })
-      .andWhere('NOT (:seatKey = ANY(taken))', { seatKey })
+      .andWhere('NOT (:seatKeyCheck = ANY(taken))', { seatKeyCheck: seatKey })
+      .setParameter('seatKeyParam', seatKey)
       .execute();
 
     return (result.affected || 0) > 0;

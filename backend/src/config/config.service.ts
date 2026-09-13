@@ -52,4 +52,8 @@ export class ConfigService {
   get debug(): boolean {
     return this.configService.get<string>('DEBUG') === '*';
   }
+
+  get loggerType(): string {
+    return this.configService.get<string>('LOGGER_TYPE') || 'dev';
+  }
 }
